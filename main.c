@@ -34,7 +34,7 @@ const char* nomeCor(int cor) {
         case AZUL:
             return "Azul";
         default:
-            return "Cor Inválida";
+            return "Preta";
     }
 }
 
@@ -55,6 +55,12 @@ void printCardsColumns(Carta cards[], int n) {
                     break;
                 case 12:
                     printf("+2");
+                    break;
+                case 13:
+                    printf("Coringa");
+                    break;
+                case 14:
+                    printf("+4");
                     break;
                 default:
                     printf("Erro: Numero invalido");
@@ -81,8 +87,16 @@ void shuffleCards(Carta cards[], int n) {
 // Função para gerar uma carta aleatória
 Carta gerarCartaAleatoria() {
     Carta carta;
-    carta.cor = rand() % 4;    // Gera um número aleatório de 0 a 3 para representar uma cor
-    carta.numero = rand() % 12 + 1; // Gera um número aleatório de 1 a 12 para representar um número de carta
+    carta.cor = rand() % (PRETO + 1);  // Gera um número aleatório de 0 a PRETO
+
+    if (carta.cor == PRETO) {
+        // Se for preto, escolhe aleatoriamente entre Coringa e +4
+        carta.numero = (rand() % 2 == 0) ? CORINGA : MAIS_QUATRO;
+    } else {
+        // Se não for preto, escolhe aleatoriamente entre 1 e 12
+        carta.numero = (rand() % 12) + 1;
+    }
+
     return carta;
 }
 
@@ -295,22 +309,6 @@ void mergeSort(Carta cards[], int left, int right) {
     }
 }
 
-
-
-
-int readSpecialCard(const char* specialCard) {
-    if (strcmp(specialCard, "Voltar") == 0) {
-        return VOLTAR;
-    } else if (strcmp(specialCard, "Pular") == 0) {
-        return PULAR;
-    } else if (strcmp(specialCard, "+2") == 0) {
-        return MAIS_DOIS;
-    } else {
-        // Retorne -1 ou outro valor para indicar um erro
-        return -1;
-    }
-}
-
 int readCardsFromFile(const char* filename, Carta cards[], int* n) {
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
@@ -346,13 +344,17 @@ int readCardsFromFile(const char* filename, Carta cards[], int* n) {
                 if (strcmp(numeroStr, "Coringa") == 0) {
                     cards[conjunto * 10 + i].cor = PRETO;
                     cards[conjunto * 10 + i].numero = CORINGA;
-                } else if (strcmp(numeroStr, "+4") == 0) {
-                    cards[conjunto * 10 + i].cor = PRETO;
-                    cards[conjunto * 10 + i].numero = MAIS_QUATRO;
                 } else {
-                    printf("Erro: Carta preta invalida no arquivo.\n");
-                    fclose(file);
-                    return 0;
+                    char sinal, num;
+                    sscanf(numeroStr, "%c%c", &sinal, &num);
+                    if (sinal == '+' && num == '4') {
+                        cards[conjunto * 10 + i].cor = PRETO;
+                        cards[conjunto * 10 + i].numero = MAIS_QUATRO;
+                    } else {
+                        printf("Erro: Carta preta invalida no arquivo: %s\n", numeroStr);
+                        fclose(file);
+                        return 0;
+                    }
                 }
             } else {
                 // Se não é preto, então é uma carta normal com número
@@ -364,6 +366,9 @@ int readCardsFromFile(const char* filename, Carta cards[], int* n) {
     fclose(file);
     return 1;
 }
+
+
+
 
 
 void escolherAlgoritmo(Carta cards[], int n, int opcao) {
@@ -422,6 +427,77 @@ void escolherAlgoritmo(Carta cards[], int n, int opcao) {
     printf("\nNumero de Comparacoes: %lld\n", comparacoes);
     printf("Numero de Movimentacoes: %lld\n", movimentacoes);
     printf("Tempo de execucao: %f segundos\n", elapsed_time);
+}
+void ordenarConjuntos(const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    int numConjuntos;
+    fscanf(file, "%d", &numConjuntos);
+
+    for (int conjunto = 0; conjunto < numConjuntos; conjunto++) {
+        Carta conjuntoCartas[10];
+
+        for (int i = 0; i < 10; i++) {
+            char corStr[10];
+            char numeroStr[20];
+
+            if (fscanf(file, " (%9[^ ] %[^(])", corStr, numeroStr) != 2) {
+                printf("Erro ao ler a carta %d do conjunto %d.\n", i + 1, conjunto + 1);
+                fclose(file);
+                return;
+            }
+
+            if (strcmp(corStr, "Azul") == 0) {
+                conjuntoCartas[i].cor = AZUL;
+            } else if (strcmp(corStr, "Amarelo") == 0) {
+                conjuntoCartas[i].cor = AMARELO;
+            } else if (strcmp(corStr, "Vermelho") == 0) {
+                conjuntoCartas[i].cor = VERMELHO;
+            } else if (strcmp(corStr, "Verde") == 0) {
+                conjuntoCartas[i].cor = VERDE;
+            } else if (strcmp(corStr, "Preto") == 0) {
+                if (strcmp(numeroStr, "Coringa") == 0) {
+                    conjuntoCartas[i].cor = PRETO;
+                    conjuntoCartas[i].numero = CORINGA;
+                } else if (strcmp(numeroStr, "+4") == 0) {
+                    conjuntoCartas[i].cor = PRETO;
+                    conjuntoCartas[i].numero = MAIS_QUATRO;
+                } else {
+                    printf("Erro: Carta preta inválida no arquivo.\n");
+                    fclose(file);
+                    return;
+                }
+            } else {
+                conjuntoCartas[i].cor = atoi(corStr);
+                conjuntoCartas[i].numero = atoi(numeroStr);
+            }
+        }
+
+        // Ordena o conjunto de cartas
+        // Você pode escolher o algoritmo de ordenação aqui
+        // Vou usar o Bubble Sort como exemplo, mas você pode substituir por outro
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9 - i; j++) {
+                if (conjuntoCartas[j].cor > conjuntoCartas[j + 1].cor ||
+                    (conjuntoCartas[j].cor == conjuntoCartas[j + 1].cor &&
+                     conjuntoCartas[j].numero > conjuntoCartas[j + 1].numero)) {
+                    Carta temp = conjuntoCartas[j];
+                    conjuntoCartas[j] = conjuntoCartas[j + 1];
+                    conjuntoCartas[j + 1] = temp;
+                }
+            }
+        }
+
+        // Imprime as cartas ordenadas do conjunto
+        printf("\nConjunto %d - Cartas Ordenadas:\n", conjunto + 1);
+        printCardsColumns(conjuntoCartas, 10);
+    }
+
+    fclose(file);
 }
 int main() {
     Carta cards[100]; // Ajuste o tamanho conforme necessário
