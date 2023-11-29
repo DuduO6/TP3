@@ -53,13 +53,13 @@ int main() {
         printf("3 - Heap Sort\n");
         printf("4 - Selection Sort\n");
         printf("5 - Insertion Sort\n");
-        printf("6 - Merge Sort\n");
+        printf("6 - Shell Sort\n");
 
         scanf("%d", &opcaoAlgoritmo);
         escolherAlgoritmo(cards, n, opcaoAlgoritmo);
 
     } else if (modo == 2) {
-        if (!LerCartasArquivo("teste2.txt", cards, &n)) {
+        if (!LerCartasArquivo("teste.txt", cards, &n)) {
             return 1;
         }
 
@@ -79,7 +79,7 @@ int main() {
         printf("3 - Heap Sort\n");
         printf("4 - Selection Sort\n");
         printf("5 - Insertion Sort\n");
-        printf("6 - Merge Sort\n");
+        printf("6 - Shell Sort\n");
 
         scanf("%d", &opcaoAlgoritmo);
         escolherAlgoritmo(cards, n * 10, opcaoAlgoritmo);

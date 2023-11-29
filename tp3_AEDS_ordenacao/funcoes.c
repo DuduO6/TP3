@@ -242,65 +242,25 @@ void insertionSort(Carta cards[], int n) {
     }
 }
 
-// Merge Sort
-void merge(Carta cards[], int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+// Sheel Sort
+void shellSort(Carta cards[], int n) {
+    for (int gap = n / 2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i++) {
+            Carta temp = cards[i];
+            int j;
 
-    // Cria arrays temporários
-    Carta leftArray[n1], rightArray[n2];
+            for (j = i; j >= gap && (temp.cor < cards[j - gap].cor ||
+                    (temp.cor == cards[j - gap].cor && temp.numero < cards[j - gap].numero)); j -= gap) {
+                comparacoes++;
+                cards[j] = cards[j - gap];
+                movimentacoes++;
+            }
 
-    // Copia os dados para os arrays temporários
-    for (int i = 0; i < n1; i++)
-        leftArray[i] = cards[left + i];
-    for (int j = 0; j < n2; j++)
-        rightArray[j] = cards[mid + 1 + j];
-
-    int i = 0, j = 0, k = left;
-    while (i < n1 && j < n2) {
-        comparacoes++;  // Para cada comparação
-        // Compare primeiro as cores, em caso de igualdade compare os números
-        if (leftArray[i].cor < rightArray[j].cor ||
-            (leftArray[i].cor == rightArray[j].cor && leftArray[i].numero <= rightArray[j].numero)) {
-            cards[k] = leftArray[i];
-            i++;
-        } else {
-            cards[k] = rightArray[j];
-            j++;
+            cards[j] = temp;
+            movimentacoes++;
         }
-        movimentacoes++;  // 1 movimentação foi realizada
-        k++;
-    }
-
-    // Copia os elementos restantes, se houver
-    while (i < n1) {
-        cards[k] = leftArray[i];
-        movimentacoes++;  // 1 movimentação foi realizada
-        i++;
-        k++;
-    }
-
-    while (j < n2) {
-        cards[k] = rightArray[j];
-        movimentacoes++;  // 1 movimentação foi realizada
-        j++;
-        k++;
     }
 }
-
-void mergeSort(Carta cards[], int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-
-        // Ordena as duas metades
-        mergeSort(cards, left, mid);
-        mergeSort(cards, mid + 1, right);
-
-        // Junta as duas metades ordenadas
-        merge(cards, left, mid, right);
-    }
-}
-
 
 
 
@@ -486,10 +446,10 @@ void escolherAlgoritmo(Carta cards[], int n, int opcao) {
             break;
         case 6:
             start_time = clock();
-            mergeSort(cards, 0, n - 1);
+            shellSort(cards, n);
             end_time = clock();
             elapsed_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-            printf("\nCartas Ordenadas (Merge Sort):\n");
+            printf("\nCartas Ordenadas (Sheel Sort):\n");
             break;
         default:
             printf("Opção invalida.\n");
@@ -591,10 +551,10 @@ void aplicar_algoritmo(Carta cards[], int n) {
     printf("\nCartas embaralhadas:\n");
     PrintarCartas(cards, n);
     start_time = clock();
-    mergeSort(cards, 0, n - 1);
+    shellSort(cards, n);
     end_time = clock();
     elapsed_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-    printf("\nCartas Ordenadas (Merge Sort):\n");
+    printf("\nCartas Ordenadas (Shell Sort):\n");
     PrintarCartas(cards, n);
     printf("\nNumero de Comparacoes: %I64d\n", comparacoes);
     printf("Numero de Movimentacoes: %I64d\n", movimentacoes);
